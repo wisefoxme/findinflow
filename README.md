@@ -22,7 +22,7 @@ sf plugins update findinflow
 Install a specific version:
 
 ```bash
-sf plugins install findinflow@1.0.0
+sf plugins install findinflow@1.1.0
 ```
 
 Run from a Salesforce DX project directory (or pass `--project-dir`).
@@ -89,6 +89,23 @@ npm publish --access public
 ```
 
 `prepack` runs `sf-prepack` so the tarball includes `lib/`, `oclif.manifest.json`, and messages.
+
+### Version bump guide (SemVer)
+
+Use [Semantic Versioning](https://semver.org/) for each release:
+
+- **patch** (`x.y.Z`): bug fixes or internal-only changes
+- **minor** (`x.Y.0`): backward-compatible features or behavior improvements
+- **major** (`X.0.0`): breaking CLI/behavior changes
+
+When bumping, update `package.json` and any README version examples in the same change.  
+For local bumps without creating tags automatically:
+
+```bash
+npm version patch --no-git-tag-version
+npm version minor --no-git-tag-version
+npm version major --no-git-tag-version
+```
 
 ## Indexed Flow elements
 
