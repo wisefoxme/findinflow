@@ -22,7 +22,7 @@ sf plugins update findinflow
 Install a specific version:
 
 ```bash
-sf plugins install findinflow@1.1.0
+sf plugins install findinflow@1.2.0
 ```
 
 Run from a Salesforce DX project directory (or pass `--project-dir`).
@@ -107,6 +107,17 @@ npm version minor --no-git-tag-version
 npm version major --no-git-tag-version
 ```
 
+## Scan scope
+
+By design, commands scan **only** `*.flow-meta.xml` files under `packageDirectories` in the DX project (see `sfdx-project.json`). They do **not** connect to an org or call the Tooling/Metadata API.
+
+On each default project scan (not when `--flow` points at a single file), the CLI:
+
+- Warns that results reflect **local metadata only**—flows that exist only in the org but were not retrieved are omitted.
+- Warns when other flow files exist **outside** `packageDirectories` (for example under `unpackaged/`) so you know they were not scanned.
+
+Retrieve flows into a package path (for example `force-app/main/default/flows/`), or pass `--flow` with a path to one `.flow-meta.xml` to analyze a file outside the default scope.
+
 ## Indexed Flow elements
 
 - `start` — record-triggered object, entry filters, and `filterFormula`
@@ -122,7 +133,7 @@ npm version major --no-git-tag-version
 
 **Relationship inference** (no org describe): multi-segment `$Record` and resource paths index each hop. Lookup/create **element names** map to their `object` (including `storeOutputAutomatically`). Naming heuristics: segments without `__` advance to that standard object name, `Foo__r` relationships containing `__` become `Foo__c`, and `Foo__c` segments stay on the parent object. Polymorphic or misnamed relationships can make `--object` filters miss or mislabel hits.
 
-**Still limited:** full formula AST, `recordRollbacks`, org-only flows not in source, screen component bindings without SObject typing, and dynamic choice sets. No matches does not prove a field is unused.
+**Still limited:** full formula AST, `recordRollbacks`, screen component bindings without SObject typing, and dynamic choice sets. Org-only flows stay out of scope until retrieved locally. No matches does not prove a field is unused.
 
 ## License
 

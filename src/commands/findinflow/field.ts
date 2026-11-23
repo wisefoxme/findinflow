@@ -1,7 +1,8 @@
 import { Messages, SfError } from '@salesforce/core';
 import { SfCommand, Flags } from '@salesforce/sf-plugins-core';
 import { hitsToTableRows, sortHits } from '../../shared/format-output.js';
-import { loadParsedFlows } from '../../shared/run-scan.js';
+import { emitScanWarnings } from '../../shared/emit-scan-warnings.js';
+import { loadFlowScanContext } from '../../shared/run-scan.js';
 import { searchFieldInFlows } from '../../shared/search-field.js';
 import { flowScopeFlags } from '../../shared/shared-flags.js';
 import type { FlowHit } from '../../shared/types.js';
@@ -38,11 +39,13 @@ export default class FindinflowField extends SfCommand<FieldResult> {
       throw new SfError(messages.getMessage('errors.flowFlagsExclusive'), 'ConflictingFlags');
     }
 
-    const flows = await loadParsedFlows({
+    const { flows, meta } = await loadFlowScanContext({
       projectDir: flags['project-dir'],
       flow: flags.flow,
       flowRegexp: flags['flow-regexp'],
     });
+
+    emitScanWarnings(this, meta);
 
     if (flows.length === 0) {
       this.warn(messages.getMessage('warnings.noFlows'));

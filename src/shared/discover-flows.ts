@@ -3,6 +3,7 @@ import { isAbsolute, join, resolve } from 'node:path';
 import { access } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { SfProject } from '@salesforce/core';
+import { isSingleFileFlowScope, resolvePackageRoots } from './discover-flow-scan-meta.js';
 import type { DiscoverFlowsOptions } from './types.js';
 
 async function pathExists(path: string): Promise<boolean> {
@@ -66,16 +67,13 @@ function matchesFlowFilter(
 export async function discoverFlowFiles(options: DiscoverFlowsOptions = {}): Promise<string[]> {
   const project = await SfProject.resolve(options.projectDir);
   const projectPath = project.getPath();
-  const packageDirs = project.getUniquePackageDirectories();
-  const searchRoots =
-    packageDirs.length > 0
-      ? packageDirs.map((p) => join(projectPath, p.path))
-      : [projectPath];
+  const packageDirPaths = project.getUniquePackageDirectories().map((p) => p.path);
+  const searchRoots = resolvePackageRoots(projectPath, packageDirPaths);
 
   const regexp = options.flowRegexp ? new RegExp(options.flowRegexp) : undefined;
   const collected: string[] = [];
 
-  if (options.flow && (options.flow.endsWith('.flow-meta.xml') || options.flow.includes('/') || isAbsolute(options.flow))) {
+  if (options.flow && isSingleFileFlowScope(options.flow)) {
     const candidate = isAbsolute(options.flow) ? options.flow : resolve(process.cwd(), options.flow);
     if (await pathExists(candidate)) {
       return [candidate];

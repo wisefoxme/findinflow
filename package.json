@@ -1,7 +1,7 @@
 {
   "name": "findinflow",
   "description": "Read-only Salesforce CLI plugin to find field and object usage in local Flow metadata.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "Renato Oliveira",
   "bugs": "https://github.com/wisefoxme/findinflow/issues",
   "homepage": "https://github.com/wisefoxme/findinflow",

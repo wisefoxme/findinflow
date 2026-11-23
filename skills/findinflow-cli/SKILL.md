@@ -46,6 +46,15 @@ If the user is developing the plugin from a clone, use `sf plugins link .` after
 
 Do not pass both `--flow` and `--flow-regexp`.
 
+## Scan warnings
+
+Default project scans (not single-file `--flow` paths) emit CLI **warnings**:
+
+- **Local only:** only metadata in the DX project is searched; retrieve flows into `packageDirectories` before relying on results.
+- **Outside packageDirectories:** flow files elsewhere in the repo are listed (count + sample paths) because they are **not** scanned.
+
+There is **no** org-side or Tooling API scan; that is intentional for offline, read-only use.
+
 ## Field search
 
 ```bash
@@ -94,8 +103,7 @@ Decision and collection **conditions** share one indexer (`leftValueReference` a
 **Relationship paths:** `$Record.Account.BillingState` indexes `Account` on the trigger object and
 `BillingState` on `Account` via naming heuristics (`__r` / standard names)—not org describe.
 
-**Still limited:** full formula AST, flows not in the local repo, screen picklist/component refs
-without typing, and dynamic choice sets. Treat no matches as inconclusive for edge-heavy flows.
+**Still limited:** full formula AST, screen picklist/component refs without typing, and dynamic choice sets. Flows not in the project (org-only or outside `packageDirectories`) are not searched. Treat no matches as inconclusive for edge-heavy flows.
 
 ## Errors
 
@@ -103,6 +111,8 @@ without typing, and dynamic choice sets. Treat no matches as inconclusive for ed
 |-----------|--------|
 | Command not found | `sf plugins install findinflow` |
 | No flows found | Check `--project-dir`, retrieve flows into `force-app/.../flows/`, or relax filters |
+| Outside packageDirectories warning | Move or retrieve flows into a package directory, or use `--flow` with a file path |
+| Local-only warning | Expected on project scans; retrieve missing flows or accept incomplete coverage |
 | No matches | Try without `--object`, widen flow scope, or confirm API names from metadata |
 
 ## Related

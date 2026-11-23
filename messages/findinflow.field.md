@@ -32,7 +32,7 @@ Use either --flow or --flow-regexp, not both.
 
 # warnings.noFlows
 
-No flow files matched the scope filters.
+No flow files matched the scope filters. Retrieve Flow metadata into packageDirectories (for example force-app/main/default/flows/) or adjust --flow / --flow-regexp.
 
 # info.noMatches
 
