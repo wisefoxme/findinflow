@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <formulas>
+        <name>MissingFields</name>
+        <dataType>String</dataType>
+        <expression>IF(ISBLANK({!PatientAccount.FirstName}), "First Name", "")</expression>
+    </formulas>
+    <label>Validate Referral Account</label>
+    <variables>
+        <name>PatientAccount</name>
+        <dataType>SObject</dataType>
+        <objectType>Account</objectType>
+    </variables>
+</Flow>

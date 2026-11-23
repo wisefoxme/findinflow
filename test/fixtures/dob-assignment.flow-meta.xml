@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <assignments>
+        <name>SetDOB</name>
+        <label>SetDOB</label>
+        <assignmentItems>
+            <assignToReference>$Record.DOB__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>textDOB</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <formulas>
+        <name>textDOB</name>
+        <dataType>String</dataType>
+        <expression>TEXT(Month({!$Record.PersonBirthdate}))</expression>
+    </formulas>
+    <label>DOB-Birthdate</label>
+    <start>
+        <object>Account</object>
+        <filters>
+            <field>PersonBirthdate</field>
+            <operator>IsNull</operator>
+        </filters>
+    </start>
+</Flow>

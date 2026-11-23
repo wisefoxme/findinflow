@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <recordUpdates>
+        <name>updateopen</name>
+        <label>updateopen</label>
+        <filters>
+            <field>Time_Completed__c</field>
+            <operator>EqualTo</operator>
+        </filters>
+        <inputAssignments>
+            <field>Time_Completed__c</field>
+            <value>
+                <elementReference>$Flow.InterviewStartTime</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Referral_Stage_History__c</object>
+    </recordUpdates>
+    <start>
+        <object>Referral_Stage_History__c</object>
+        <filters>
+            <field>Status</field>
+            <operator>IsChanged</operator>
+        </filters>
+    </start>
+    <label>Referral Stage History</label>
+</Flow>

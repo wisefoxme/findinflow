@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <recordLookups>
+        <name>Get_Patient</name>
+        <label>Get Patient</label>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Patient.Id</elementReference>
+            </value>
+        </filters>
+        <object>Account</object>
+    </recordLookups>
+    <label>Lookup Sample</label>
+</Flow>
