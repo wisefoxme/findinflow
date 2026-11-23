@@ -36,6 +36,16 @@ describe('ref-parse', () => {
     expect(path.at(-1)).to.deep.equal({ field: 'Status__c', object: 'RelatedObject__c' });
   });
 
+  it('maps standard object relationship suffixes without adding __c', () => {
+    expect(inferObjectFromRelationshipField('Opportunity__r', 'LoanEvent__c')).to.equal('Opportunity');
+    expect(inferObjectFromRelationshipField('RelatedOpportunity__r', 'LoanEvent__c')).to.equal('Opportunity');
+    expect(inferObjectFromRelationshipField('RelatedOpp__r', 'LoanEvent__c')).to.equal('Opportunity');
+    expect(expandReadPath('$Record.RelatedOpp__r.OwnerId', 'LoanEvent__c').at(-1)).to.deep.equal({
+      field: 'OwnerId',
+      object: 'Opportunity',
+    });
+  });
+
   it('resolves lookup variable object for field reads', () => {
     const vars = new Map([['Get_Row', 'ChildObject__c']]);
     expect(expandReadPath('Get_Row.Custom__c', undefined, vars)).to.deep.equal([

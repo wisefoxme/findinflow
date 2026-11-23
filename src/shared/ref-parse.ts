@@ -1,12 +1,40 @@
 export type PathFieldRef = { field: string; object?: string };
 
+const standardRelationshipObjects = new Map<string, string>([
+  ['Account', 'Account'],
+  ['Acct', 'Account'],
+  ['Asset', 'Asset'],
+  ['Campaign', 'Campaign'],
+  ['Case', 'Case'],
+  ['Contact', 'Contact'],
+  ['Contract', 'Contract'],
+  ['Entitlement', 'Entitlement'],
+  ['Event', 'Event'],
+  ['Individual', 'Individual'],
+  ['Lead', 'Lead'],
+  ['Opportunity', 'Opportunity'],
+  ['Opp', 'Opportunity'],
+  ['Order', 'Order'],
+  ['Pricebook2', 'Pricebook2'],
+  ['Product2', 'Product2'],
+  ['Quote', 'Quote'],
+  ['Task', 'Task'],
+  ['User', 'User'],
+]);
+
 /** Guess related object after a relationship field segment (no org describe). */
 export function inferObjectFromRelationshipField(
   segment: string,
   currentObject: string | undefined,
 ): string | undefined {
   if (segment.endsWith('__r')) {
-    return `${segment.slice(0, -3)}__c`;
+    const relationshipName = segment.slice(0, -3);
+    for (const [suffix, object] of standardRelationshipObjects) {
+      if (relationshipName === suffix || relationshipName.endsWith(suffix)) {
+        return object;
+      }
+    }
+    return `${relationshipName}__c`;
   }
   if (segment.endsWith('__c')) {
     return currentObject;

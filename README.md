@@ -103,7 +103,7 @@ npm publish --access public
 - `collectionProcessors` and `loops`
 - `customErrors` (`fieldSelection` on record-triggered flows)
 
-**Relationship inference** (no org describe): multi-segment `$Record` and resource paths index each hop. Lookup/create **element names** map to their `object` (including `storeOutputAutomatically`). Naming heuristics: standard segments (e.g. `Account`) advance to that object; `Foo__r` → `Foo__c`; `Foo__c` segments stay on the parent object. Polymorphic or misnamed relationships can make `--object` filters miss or mislabel hits.
+**Relationship inference** (no org describe): multi-segment `$Record` and resource paths index each hop. Lookup/create **element names** map to their `object` (including `storeOutputAutomatically`). Naming heuristics: standard segments (e.g. `Account`) and recognized standard-object `__r` suffixes advance to that object; other `Foo__r` relationships become `Foo__c`; `Foo__c` segments stay on the parent object. Polymorphic or misnamed relationships can make `--object` filters miss or mislabel hits.
 
 **Still limited:** full formula AST, `recordRollbacks`, org-only flows not in source, screen component bindings without SObject typing, and dynamic choice sets. No matches does not prove a field is unused.
 

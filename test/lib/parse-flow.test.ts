@@ -110,6 +110,17 @@ describe('parse-flow', () => {
     ).to.equal(true);
   });
 
+  it('finds fields read through standard object relationship names', async () => {
+    const flow = parseFlowFile(
+      await loadFixture('standard-object-relationship.flow-meta.xml'),
+      join(fixtures, 'Standard_Object_Relationship.flow-meta.xml'),
+    );
+    const hits = searchFieldInFlow(flow, { fieldName: 'OwnerId', object: 'Opportunity' });
+    expect(hits.some((h) => h.usage === 'read' && h.detail === 'inputAssignment.value.elementReference.pathSegment')).to.equal(
+      true,
+    );
+  });
+
   it('indexes lookup output context in decisions and DML', async () => {
     const flow = parseFlowFile(
       await loadFixture('lookup-output-context.flow-meta.xml'),
