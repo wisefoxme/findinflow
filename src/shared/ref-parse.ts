@@ -6,7 +6,8 @@ export function inferObjectFromRelationshipField(
   currentObject: string | undefined,
 ): string | undefined {
   if (segment.endsWith('__r')) {
-    return `${segment.slice(0, -3)}__c`;
+    const relationshipName = segment.slice(0, -3);
+    return relationshipName.includes('__') ? `${relationshipName}__c` : relationshipName;
   }
   if (segment.endsWith('__c')) {
     return currentObject;

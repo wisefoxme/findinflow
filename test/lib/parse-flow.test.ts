@@ -103,11 +103,26 @@ describe('parse-flow', () => {
       searchFieldInFlow(flow, { fieldName: 'BillingState', object: 'Account' }).some((h) => h.nodeType === 'decisions'),
     ).to.equal(true);
     expect(
-      searchFieldInFlow(flow, { fieldName: 'RelatedObject__r', object: 'SampleObject__c' }).some((h) => h.nodeType === 'formulas'),
+      searchFieldInFlow(flow, { fieldName: 'ns__RelatedObject__r', object: 'SampleObject__c' }).some(
+        (h) => h.nodeType === 'formulas',
+      ),
     ).to.equal(true);
     expect(
-      searchFieldInFlow(flow, { fieldName: 'Status__c', object: 'RelatedObject__c' }).some((h) => h.nodeType === 'formulas'),
+      searchFieldInFlow(flow, { fieldName: 'Status__c', object: 'ns__RelatedObject__c' }).some(
+        (h) => h.nodeType === 'formulas',
+      ),
     ).to.equal(true);
+  });
+
+  it('finds fields read through standard object relationship names', async () => {
+    const flow = parseFlowFile(
+      await loadFixture('standard-object-relationship.flow-meta.xml'),
+      join(fixtures, 'Standard_Object_Relationship.flow-meta.xml'),
+    );
+    const hits = searchFieldInFlow(flow, { fieldName: 'OwnerId', object: 'Opportunity' });
+    expect(hits.some((h) => h.usage === 'read' && h.detail === 'inputAssignment.value.elementReference.pathSegment')).to.equal(
+      true,
+    );
   });
 
   it('indexes lookup output context in decisions and DML', async () => {

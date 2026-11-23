@@ -22,7 +22,7 @@ sf plugins update findinflow
 Install a specific version:
 
 ```bash
-sf plugins install findinflow@1.0.0
+sf plugins install findinflow@1.1.0
 ```
 
 Run from a Salesforce DX project directory (or pass `--project-dir`).
@@ -90,6 +90,23 @@ npm publish --access public
 
 `prepack` runs `sf-prepack` so the tarball includes `lib/`, `oclif.manifest.json`, and messages.
 
+### Version bump guide (SemVer)
+
+Use [Semantic Versioning](https://semver.org/) for each release:
+
+- **patch** (`x.y.Z`): bug fixes or internal-only changes
+- **minor** (`x.Y.0`): backward-compatible features or behavior improvements
+- **major** (`X.0.0`): breaking CLI/behavior changes
+
+When bumping, update `package.json` and any README version examples in the same change.  
+For local bumps without creating tags automatically:
+
+```bash
+npm version patch --no-git-tag-version
+npm version minor --no-git-tag-version
+npm version major --no-git-tag-version
+```
+
 ## Indexed Flow elements
 
 - `start` — record-triggered object, entry filters, and `filterFormula`
@@ -103,7 +120,7 @@ npm publish --access public
 - `collectionProcessors` and `loops`
 - `customErrors` (`fieldSelection` on record-triggered flows)
 
-**Relationship inference** (no org describe): multi-segment `$Record` and resource paths index each hop. Lookup/create **element names** map to their `object` (including `storeOutputAutomatically`). Naming heuristics: standard segments (e.g. `Account`) advance to that object; `Foo__r` → `Foo__c`; `Foo__c` segments stay on the parent object. Polymorphic or misnamed relationships can make `--object` filters miss or mislabel hits.
+**Relationship inference** (no org describe): multi-segment `$Record` and resource paths index each hop. Lookup/create **element names** map to their `object` (including `storeOutputAutomatically`). Naming heuristics: segments without `__` advance to that standard object name, `Foo__r` relationships containing `__` become `Foo__c`, and `Foo__c` segments stay on the parent object. Polymorphic or misnamed relationships can make `--object` filters miss or mislabel hits.
 
 **Still limited:** full formula AST, `recordRollbacks`, org-only flows not in source, screen component bindings without SObject typing, and dynamic choice sets. No matches does not prove a field is unused.
 
