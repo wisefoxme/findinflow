@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Lookup Output Context</label>
+    <decisions>
+        <name>Check_Row</name>
+        <label>Check Row</label>
+        <rules>
+            <name>Has_Custom</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Row.Custom__c</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+        </rules>
+    </decisions>
+    <recordLookups>
+        <name>Get_Row</name>
+        <label>Get Row</label>
+        <filters>
+            <field>Parent__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>ChildObject__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordUpdates>
+        <name>Update_Row</name>
+        <label>Update Row</label>
+        <inputAssignments>
+            <field>Status__c</field>
+            <value>
+                <elementReference>Get_Row.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <object>ChildObject__c</object>
+    </recordUpdates>
+    <start>
+        <object>SampleObject__c</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+</Flow>

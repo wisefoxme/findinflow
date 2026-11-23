@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Collection Processor Sample</label>
+    <collectionProcessors>
+        <name>Filter_Items</name>
+        <label>Filter Items</label>
+        <assignNextValueToReference>currentItem_Filter_Items</assignNextValueToReference>
+        <conditionLogic>and</conditionLogic>
+        <conditions>
+            <leftValueReference>currentItem_Filter_Items.Status__c</leftValueReference>
+            <operator>EqualTo</operator>
+            <rightValue>
+                <stringValue>Active</stringValue>
+            </rightValue>
+        </conditions>
+    </collectionProcessors>
+</Flow>

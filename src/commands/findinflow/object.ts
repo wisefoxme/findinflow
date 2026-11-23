@@ -7,7 +7,7 @@ import { flowScopeFlags } from '../../shared/shared-flags.js';
 import type { FlowHit } from '../../shared/types.js';
 
 Messages.importMessagesDirectoryFromMetaUrl(import.meta.url);
-const messages = Messages.loadMessages('plugin-findinflow', 'findinflow.object');
+const messages = Messages.loadMessages('findinflow', 'findinflow.object');
 
 export type ObjectResult = {
   hits: FlowHit[];

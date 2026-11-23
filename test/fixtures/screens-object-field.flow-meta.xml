@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Screen Sample</label>
+    <screens>
+        <name>Confirm_Screen</name>
+        <label>Confirm</label>
+        <fields>
+            <name>Section1</name>
+            <fieldType>RegionContainer</fieldType>
+            <fields>
+                <name>Column1</name>
+                <fieldType>Region</fieldType>
+                <fields>
+                    <fieldType>ObjectProvided</fieldType>
+                    <objectFieldReference>RelatedRecord.Phone</objectFieldReference>
+                </fields>
+            </fields>
+        </fields>
+        <fields>
+            <name>AccountLookup</name>
+            <extensionName>flowruntime:lookup</extensionName>
+            <fieldType>ComponentInstance</fieldType>
+            <inputParameters>
+                <name>fieldApiName</name>
+                <value>
+                    <stringValue>ParentId</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>objectApiName</name>
+                <value>
+                    <stringValue>Account</stringValue>
+                </value>
+            </inputParameters>
+        </fields>
+    </screens>
+    <variables>
+        <name>RelatedRecord</name>
+        <dataType>SObject</dataType>
+        <objectType>Account</objectType>
+    </variables>
+</Flow>

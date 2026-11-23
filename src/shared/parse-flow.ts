@@ -1,10 +1,26 @@
 import { basename } from 'node:path';
 import { XMLParser } from 'fast-xml-parser';
-import { formulaReferences, parseElementReference } from './ref-parse.js';
+import { parseElementReference } from './ref-parse.js';
+import { parseActionCalls } from './parse-action-calls.js';
+import { parseCollectionProcessors } from './parse-collection-processors.js';
+import { parseCustomErrors } from './parse-custom-errors.js';
+import { parseLoops } from './parse-loops.js';
+import {
+  addField,
+  addObject,
+  collectFieldFromRef,
+  elementRefFromValue,
+  nodeMeta,
+  parseRecordObject,
+  scanRecordFieldExpression,
+  type FlowDoc,
+} from './parse-helpers.js';
+import { indexResourceObjects } from './index-resource-objects.js';
+import { parseDecisions } from './parse-decisions.js';
+import { parseScreens } from './parse-screens.js';
+import { parseSubflows } from './parse-subflows.js';
 import type { FieldReference, ObjectReference, ParsedFlow } from './types.js';
 import { asArray, flowXmlArrayTags, textOf } from './xml-utils.js';
-
-type FlowDoc = Record<string, unknown>;
 
 function flowApiNameFromPath(filePath: string): string {
   const base = basename(filePath);
@@ -20,107 +36,11 @@ function buildParser(): XMLParser {
   });
 }
 
-function elementRefFromValue(value: unknown): string | undefined {
-  if (typeof value === 'object' && value !== null && 'elementReference' in value) {
-    return textOf((value as FlowDoc).elementReference);
-  }
-  return undefined;
-}
-
-function nodeMeta(node: FlowDoc): { nodeName: string; nodeLabel?: string } {
-  return {
-    nodeName: textOf(node.name) ?? 'unknown',
-    nodeLabel: textOf(node.label),
-  };
-}
-
-function addField(
-  refs: FieldReference[],
-  args: Omit<FieldReference, 'field' | 'object' | 'usage' | 'detail'> & {
-    field: string;
-    object?: string;
-    usage: FieldReference['usage'];
-    detail: string;
-  },
-): void {
-  refs.push({
-    field: args.field,
-    object: args.object,
-    usage: args.usage,
-    detail: args.detail,
-    nodeName: args.nodeName,
-    nodeType: args.nodeType,
-    nodeLabel: args.nodeLabel,
-  });
-}
-
-function addObject(
-  refs: ObjectReference[],
-  args: Omit<ObjectReference, 'object' | 'detail'> & { object: string; detail: string },
-): void {
-  refs.push({
-    object: args.object,
-    detail: args.detail,
-    nodeName: args.nodeName,
-    nodeType: args.nodeType,
-    nodeLabel: args.nodeLabel,
-  });
-}
-
-function collectFieldFromRef(
-  refs: FieldReference[],
-  ref: string | undefined,
-  usage: FieldReference['usage'],
-  detail: string,
-  nodeType: string,
-  meta: { nodeName: string; nodeLabel?: string },
-  recordObject: string | undefined,
-  variableObjects: Map<string, string>,
-): void {
-  if (!ref) {
-    return;
-  }
-  const parsed = parseElementReference(ref, recordObject, variableObjects);
-  if (!parsed.field) {
-    return;
-  }
-  addField(refs, {
-    ...meta,
-    nodeType,
-    field: parsed.field,
-    object: parsed.object,
-    usage,
-    detail,
-  });
-}
-
-function indexVariables(flow: FlowDoc): Map<string, string> {
-  const map = new Map<string, string>();
-  for (const variable of asArray<FlowDoc>(flow.variables)) {
-    const name = textOf(variable.name);
-    const objectType = textOf(variable.objectType);
-    if (name && objectType) {
-      map.set(name, objectType);
-    }
-  }
-  return map;
-}
-
-function parseRecordObject(flow: FlowDoc): string | undefined {
-  for (const start of asArray<FlowDoc>(flow.start)) {
-    const object = textOf(start.object);
-    if (object) {
-      return object;
-    }
-  }
-  return undefined;
-}
-
 function parseDmlNodes(
-  flow: FlowDoc,
   nodeType: string,
   nodes: FlowDoc[],
   recordObject: string | undefined,
+  variableObjects: Map<string, string>,
   fieldRefs: FieldReference[],
   objectRefs: ObjectReference[],
 ): void {
@@ -177,7 +97,7 @@ function parseDmlNodes(
         nodeType,
         meta,
         recordObject,
-        new Map(),
+        variableObjects,
       );
     }
 
@@ -202,7 +122,7 @@ function parseDmlNodes(
         nodeType,
         meta,
         recordObject,
-        new Map(),
+        variableObjects,
       );
     }
   }
@@ -258,74 +178,22 @@ function parseFormulas(
     if (!expression) {
       continue;
     }
-    for (const ref of formulaReferences(expression)) {
-      collectFieldFromRef(
-        fieldRefs,
-        ref,
-        'read',
-        'formula.expression',
-        'formulas',
-        meta,
-        recordObject,
-        variableObjects,
-      );
-    }
-    // Bare $Record.Field or TEXT(Month($Record.X)) patterns without braces
-    const bareRecord = /\$Record\.([A-Za-z0-9_]+)/g;
-    let match: RegExpExecArray | null;
-    while ((match = bareRecord.exec(expression)) !== null) {
-      addField(fieldRefs, {
-        ...meta,
-        nodeType: 'formulas',
-        field: match[1],
-        object: recordObject,
-        usage: 'read',
-        detail: 'formula.expression',
-      });
-    }
-  }
-}
-
-function parseDecisions(
-  flow: FlowDoc,
-  recordObject: string | undefined,
-  variableObjects: Map<string, string>,
-  fieldRefs: FieldReference[],
-): void {
-  for (const node of asArray<FlowDoc>(flow.decisions)) {
-    const meta = nodeMeta(node);
-    for (const rule of asArray<FlowDoc>(node.rules)) {
-      for (const condition of asArray<FlowDoc>(rule.conditions)) {
-        const left = textOf(condition.leftValueReference);
-        collectFieldFromRef(
-          fieldRefs,
-          left,
-          'read',
-          'decision.condition.leftValueReference',
-          'decisions',
-          meta,
-          recordObject,
-          variableObjects,
-        );
-        const rightRef = elementRefFromValue(condition.rightValue);
-        collectFieldFromRef(
-          fieldRefs,
-          rightRef,
-          'read',
-          'decision.condition.rightValue.elementReference',
-          'decisions',
-          meta,
-          recordObject,
-          variableObjects,
-        );
-      }
-    }
+    scanRecordFieldExpression(
+      fieldRefs,
+      expression,
+      'formulas',
+      meta,
+      recordObject,
+      variableObjects,
+      'formula.expression',
+    );
   }
 }
 
 function parseStart(
   flow: FlowDoc,
   recordObject: string | undefined,
+  variableObjects: Map<string, string>,
   fieldRefs: FieldReference[],
   objectRefs: ObjectReference[],
 ): void {
@@ -347,6 +215,18 @@ function parseStart(
           detail: 'start.filter',
         });
       }
+    }
+    const filterFormula = textOf(start.filterFormula);
+    if (filterFormula) {
+      scanRecordFieldExpression(
+        fieldRefs,
+        filterFormula,
+        'start',
+        meta,
+        object ?? recordObject,
+        variableObjects,
+        'start.filterFormula',
+      );
     }
   }
 }
@@ -373,20 +253,26 @@ export function parseFlowFile(content: string, filePath: string): ParsedFlow {
   const parser = buildParser();
   const doc = parser.parse(content) as { Flow?: FlowDoc };
   const flow = doc.Flow ?? {};
-  const variableObjects = indexVariables(flow);
+  const variableObjects = indexResourceObjects(flow);
   const recordObject = parseRecordObject(flow);
   const fieldRefs: FieldReference[] = [];
   const objectRefs: ObjectReference[] = [];
 
-  parseStart(flow, recordObject, fieldRefs, objectRefs);
+  parseStart(flow, recordObject, variableObjects, fieldRefs, objectRefs);
   parseVariables(flow, objectRefs);
   parseAssignments(flow, recordObject, variableObjects, fieldRefs);
   parseFormulas(flow, recordObject, variableObjects, fieldRefs);
   parseDecisions(flow, recordObject, variableObjects, fieldRefs);
-  parseDmlNodes(flow, 'recordCreates', asArray(flow.recordCreates), recordObject, fieldRefs, objectRefs);
-  parseDmlNodes(flow, 'recordUpdates', asArray(flow.recordUpdates), recordObject, fieldRefs, objectRefs);
-  parseDmlNodes(flow, 'recordLookups', asArray(flow.recordLookups), recordObject, fieldRefs, objectRefs);
-  parseDmlNodes(flow, 'recordDeletes', asArray(flow.recordDeletes), recordObject, fieldRefs, objectRefs);
+  parseActionCalls(flow, recordObject, variableObjects, fieldRefs, objectRefs);
+  parseScreens(flow, recordObject, variableObjects, fieldRefs, objectRefs);
+  parseSubflows(flow, recordObject, variableObjects, fieldRefs);
+  parseCollectionProcessors(flow, recordObject, variableObjects, fieldRefs);
+  parseLoops(flow, recordObject, variableObjects, fieldRefs);
+  parseCustomErrors(flow, recordObject, fieldRefs);
+  parseDmlNodes('recordCreates', asArray(flow.recordCreates), recordObject, variableObjects, fieldRefs, objectRefs);
+  parseDmlNodes('recordUpdates', asArray(flow.recordUpdates), recordObject, variableObjects, fieldRefs, objectRefs);
+  parseDmlNodes('recordLookups', asArray(flow.recordLookups), recordObject, variableObjects, fieldRefs, objectRefs);
+  parseDmlNodes('recordDeletes', asArray(flow.recordDeletes), recordObject, variableObjects, fieldRefs, objectRefs);
 
   return {
     apiName: flowApiNameFromPath(filePath),

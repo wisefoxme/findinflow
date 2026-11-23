@@ -1,5 +1,10 @@
 import { expect } from 'chai';
-import { formulaReferences, parseElementReference } from '../../src/shared/ref-parse.js';
+import {
+  expandReadPath,
+  formulaReferences,
+  inferObjectFromRelationshipField,
+  parseElementReference,
+} from '../../src/shared/ref-parse.js';
 
 describe('ref-parse', () => {
   it('parses $Record field with record object', () => {
@@ -15,5 +20,27 @@ describe('ref-parse', () => {
 
   it('extracts formula references', () => {
     expect(formulaReferences('TEXT({!$Record.PersonBirthdate})')).to.deep.equal(['$Record.PersonBirthdate']);
+  });
+
+  it('expands $Record relationship path reads', () => {
+    const path = expandReadPath('$Record.Account.BillingState', 'Opportunity');
+    expect(path).to.deep.equal([
+      { field: 'Account', object: 'Opportunity' },
+      { field: 'BillingState', object: 'Account' },
+    ]);
+  });
+
+  it('maps custom __r to related __c object', () => {
+    expect(inferObjectFromRelationshipField('Related__r', 'SampleObject__c')).to.equal('Related__c');
+    const path = expandReadPath('$Record.RelatedObject__r.Status__c', 'SampleObject__c');
+    expect(path.at(-1)).to.deep.equal({ field: 'Status__c', object: 'RelatedObject__c' });
+  });
+
+  it('resolves lookup variable object for field reads', () => {
+    const vars = new Map([['Get_Row', 'ChildObject__c']]);
+    expect(expandReadPath('Get_Row.Custom__c', undefined, vars)).to.deep.equal([
+      { field: 'Custom__c', object: 'ChildObject__c' },
+    ]);
+    expect(expandReadPath('Get_Row', undefined, vars)).to.deep.equal([{ field: 'Id', object: 'ChildObject__c' }]);
   });
 });

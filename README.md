@@ -1,28 +1,28 @@
-# plugin-findinflow
+# findinflow
 
 Read-only [Salesforce CLI](https://developer.salesforce.com/tools/salesforcecli) plugin to find **field** and **sObject** usage in local Flow metadata (`*.flow-meta.xml`). No org connection is required.
 
-- **Source:** [github.com/wisefoxme/plugin-findinflow](https://github.com/wisefoxme/plugin-findinflow)
-- **npm:** [plugin-findinflow](https://www.npmjs.com/package/plugin-findinflow)
+- **Source:** [github.com/wisefoxme/findinflow](https://github.com/wisefoxme/findinflow)
+- **npm:** [findinflow](https://www.npmjs.com/package/findinflow)
 
 ## Install
 
 From npm (recommended on any machine with Salesforce CLI):
 
 ```bash
-sf plugins install plugin-findinflow
+sf plugins install findinflow
 ```
 
 Update later:
 
 ```bash
-sf plugins update plugin-findinflow
+sf plugins update findinflow
 ```
 
 Install a specific version:
 
 ```bash
-sf plugins install plugin-findinflow@1.0.0
+sf plugins install findinflow@1.0.0
 ```
 
 Run from a Salesforce DX project directory (or pass `--project-dir`).
@@ -61,8 +61,8 @@ sf findinflow field --name DOB__c --object Account --json
 ## Development
 
 ```bash
-git clone https://github.com/wisefoxme/plugin-findinflow.git
-cd plugin-findinflow
+git clone https://github.com/wisefoxme/findinflow.git
+cd findinflow
 npm install --ignore-scripts
 npm run build
 sf plugins link .
@@ -90,18 +90,27 @@ npm publish --access public
 
 `prepack` runs `sf-prepack` so the tarball includes `lib/`, `oclif.manifest.json`, and messages.
 
-## v1 coverage
+## Indexed Flow elements
 
-Indexed element types:
-
-- `start` (record-triggered object and entry filters)
+- `start` — record-triggered object, entry filters, and `filterFormula`
 - `assignments` / `assignmentItems`
 - `recordCreates`, `recordUpdates`, `recordLookups`, `recordDeletes`
 - `variables` (SObject `objectType`)
-- `formulas` and `decisions` (field references in expressions and conditions)
+- `formulas` and `decisions`
+- `actionCalls` (input/output parameters)
+- `screens` (nested `objectFieldReference`, lookup `fieldApiName` / `objectApiName`)
+- `subflows` (`inputAssignments`)
+- `collectionProcessors` and `loops`
+- `customErrors` (`fieldSelection` on record-triggered flows)
 
-Not yet indexed: `screens`, `actionCalls`, `subflows`, collection processors, and custom errors.
+**Relationship inference** (no org describe): multi-segment `$Record` and resource paths index each hop. Lookup/create **element names** map to their `object` (including `storeOutputAutomatically`). Naming heuristics: standard segments (e.g. `Account`) advance to that object; `Foo__r` → `Foo__c`; `Foo__c` segments stay on the parent object. Polymorphic or misnamed relationships can make `--object` filters miss or mislabel hits.
+
+**Still limited:** full formula AST, `recordRollbacks`, org-only flows not in source, screen component bindings without SObject typing, and dynamic choice sets. No matches does not prove a field is unused.
 
 ## License
 
-Apache-2.0
+BSD-3-Clause. See [LICENSE.txt](LICENSE.txt).
+
+## Agent skills
+
+The [skills/findinflow-cli](skills/findinflow-cli/SKILL.md) skill teaches agents how to run and interpret this CLI in Salesforce DX projects.

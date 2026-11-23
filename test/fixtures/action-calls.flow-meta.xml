@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <name>Run_Action</name>
+        <label>Run Action</label>
+        <actionName>GenericInvocable</actionName>
+        <actionType>apex</actionType>
+        <inputParameters>
+            <name>objectApiName</name>
+            <value>
+                <stringValue>Account</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>recordId</name>
+            <value>
+                <elementReference>recordId</elementReference>
+            </value>
+        </inputParameters>
+        <outputParameters>
+            <assignToReference>TargetRecord.RecordTypeId</assignToReference>
+            <name>recordTypeId</name>
+        </outputParameters>
+    </actionCalls>
+    <label>Action Sample</label>
+    <variables>
+        <name>TargetRecord</name>
+        <dataType>SObject</dataType>
+        <objectType>Account</objectType>
+    </variables>
+</Flow>

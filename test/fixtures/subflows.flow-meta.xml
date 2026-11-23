@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Subflow Sample</label>
+    <start>
+        <object>SampleObject__c</object>
+    </start>
+    <subflows>
+        <name>Call_Child</name>
+        <label>Call Child</label>
+        <flowName>Child_Flow</flowName>
+        <inputAssignments>
+            <name>ParentId</name>
+            <value>
+                <elementReference>$Record.ParentId</elementReference>
+            </value>
+        </inputAssignments>
+    </subflows>
+</Flow>
