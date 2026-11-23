@@ -31,9 +31,9 @@ describe('ref-parse', () => {
   });
 
   it('maps custom __r to related __c object', () => {
-    expect(inferObjectFromRelationshipField('Related__r', 'SampleObject__c')).to.equal('Related__c');
-    const path = expandReadPath('$Record.RelatedObject__r.Status__c', 'SampleObject__c');
-    expect(path.at(-1)).to.deep.equal({ field: 'Status__c', object: 'RelatedObject__c' });
+    expect(inferObjectFromRelationshipField('ns__Related__r', 'SampleObject__c')).to.equal('ns__Related__c');
+    const path = expandReadPath('$Record.ns__RelatedObject__r.Status__c', 'SampleObject__c');
+    expect(path.at(-1)).to.deep.equal({ field: 'Status__c', object: 'ns__RelatedObject__c' });
   });
 
   it('maps standard object __r segments without adding __c', () => {

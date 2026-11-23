@@ -19,7 +19,7 @@
     <formulas>
         <name>Flag_Label</name>
         <dataType>String</dataType>
-        <expression>TEXT({!$Record.RelatedObject__r.Status__c})</expression>
+        <expression>TEXT({!$Record.ns__RelatedObject__r.Status__c})</expression>
     </formulas>
     <recordLookups>
         <name>Get_Related</name>
@@ -28,7 +28,7 @@
             <field>Id</field>
             <operator>EqualTo</operator>
             <value>
-                <elementReference>$Record.RelatedObject__r.Id</elementReference>
+                <elementReference>$Record.ns__RelatedObject__r.Id</elementReference>
             </value>
         </filters>
         <object>RelatedObject__c</object>

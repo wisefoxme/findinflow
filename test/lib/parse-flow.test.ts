@@ -103,10 +103,14 @@ describe('parse-flow', () => {
       searchFieldInFlow(flow, { fieldName: 'BillingState', object: 'Account' }).some((h) => h.nodeType === 'decisions'),
     ).to.equal(true);
     expect(
-      searchFieldInFlow(flow, { fieldName: 'RelatedObject__r', object: 'SampleObject__c' }).some((h) => h.nodeType === 'formulas'),
+      searchFieldInFlow(flow, { fieldName: 'ns__RelatedObject__r', object: 'SampleObject__c' }).some(
+        (h) => h.nodeType === 'formulas',
+      ),
     ).to.equal(true);
     expect(
-      searchFieldInFlow(flow, { fieldName: 'Status__c', object: 'RelatedObject__c' }).some((h) => h.nodeType === 'formulas'),
+      searchFieldInFlow(flow, { fieldName: 'Status__c', object: 'ns__RelatedObject__c' }).some(
+        (h) => h.nodeType === 'formulas',
+      ),
     ).to.equal(true);
   });
 
