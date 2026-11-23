@@ -7,7 +7,7 @@
         <inputAssignments>
             <field>OwnerId</field>
             <value>
-                <elementReference>$Record.RelatedOpp__r.OwnerId</elementReference>
+                <elementReference>$Record.Opportunity__r.OwnerId</elementReference>
             </value>
         </inputAssignments>
         <object>Task</object>
